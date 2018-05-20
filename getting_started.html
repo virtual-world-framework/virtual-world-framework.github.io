@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Virtual World Framework</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/syntax.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <link href="/css/vwf.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <div class="navbar navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">
+            <img src="/images/vwf-logo-100x100.png" class="pull-left" alt="VWF Duck Logo">
+            <span class="pull-right">Virtual<br>World<br>Framework</span>
+          </a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/demos.html">Demos</a></li>
+            <li><a href="/getting_started.html">Tutorial</a></li>
+            <li><a href="/documentation.html">Documentation</a></li>
+            <li><a href="/releases.html">Downloads</a></li>
+          </ul>
+          <a href="http://github.com/virtual-world-framework/vwf" class="btn btn-info navbar-btn pull-right hidden-sm" role="button">View on GitHub</a>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">
+			<h1>Tutorial: Create Pong In An Hour</h1>
+
+<h2 class="subtitle">(and play with a remote friend!)</h2>
+
+<div class="hidden-xs">
+  <div class="panel panel-default vwf-panel">
+    <div class="panel-body">
+      <div class="well errorBox" id="errorBox">
+        <noscript>
+          <h3>I need javascript.</h3> 
+          <p>
+            To see the pong app in action, you will need to enable javascript in your browser.
+          </p>
+        </noscript>
+      </div>
+      <iframe class="vwf-frame hide" id="pongFrame" frameborder="0" src=""></iframe>
+    </div>
+    <div class="panel-footer hide">
+      <span class="small">Play VWF Pong with a friend with the below URL:</span>
+      <div class="input-group">
+        <input type="text" class="form-control" id="vwfPongId" readonly="readonly" placeholder="Loading VWF...">
+        <span class="input-group-btn">
+          <button id="copyButton" data-clipboard-target="vwfPongId" class="btn btn-info copy-button" type="button">Copy and share!</button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p>You&#39;re going to need to have VWF installed in order to follow along with this guide. If you haven&#39;t installed it yet, check out our <a href="https://github.com/virtual-world-framework/vwf#installation">Installation Instructions</a>.</p>
+
+<p>We&#39;re going to walk through the step-by-step process of writing the classic game <a href="http://en.wikipedia.org/wiki/Pong">Pong</a> as a collaborative, 3D application using VWF.</p>
+
+<h2>The VWF Application</h2>
+
+<p>From the command line, you can create an empty application using the <code>vwf</code> command:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">$ vwf create pong
+VWF application created at &#39;pong&#39;.
+
+To get started quickly:
+  $ cd pong
+  $ vwf
+
+See the Getting Started documentation at:
+https://virtual.wf/getting_started.html
+</code></pre></div>
+<p>Change into the directory you just created.</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">$ cd pong
+</code></pre></div>
+<p>In that directory you&#39;ll find a file called <code>index.vwf.yaml</code>, which describes the simplest possible VWF application. In each section of this document, we will be adding code to this file as we add and demonstrate features. Open the file in a text editor to get started and add the following:</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="nn">---</span>
+</code></pre></div>
+<p>If you&#39;ve never heard of YAML before, it&#39;s a human-readable format for specifying data. Check out <a href="http://www.yaml.org/start.html">this guide</a> for more info.</p>
+
+<p>Run the server using the <code>vwf</code> command and check out the results of loading this file:</p>
+<div class="highlight"><pre><code class="text language-text" data-lang="text">$ vwf
+LogLevel = 1
+Serving VWF applications from /path/to/pong
+Serving on port 3000
+</code></pre></div>
+<p>Point your browser at <code>http://localhost:3000</code>. When the application loads, it loads all of the relevant JavaScript and CSS and creates a connection to the server.</p>
+
+<p>But so far all we have is a black screen. Let&#39;s add some content to our application.</p>
+
+<h2>Displaying 3D Content</h2>
+
+<p>Displaying 3D models with VWF is really easy. For Pong, we&#39;ll need a board, a ball, and two paddles. Go ahead and download the Collada models from the following links and save them in your application&#39;s directory:</p>
+
+<ul>
+<li><a href="/models/board.dae">Board</a></li>
+<li><a href="/models/ball.dae">Ball</a></li>
+<li><a href="/models/paddle.dae">Paddle</a></li>
+</ul>
+
+<h3>Setting Up a 3D Scene</h3>
+
+<p>In order to tell VWF that our application involves a 3D scene, we&#39;ll want the application to extend a special <em>component</em> called <code>scene.vwf</code>.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/scene.vwf</span>
+</code></pre></div>
+<p><code>scene.vwf</code> is an example of a component. Components are the VWF way of bundling behavior and appearance. By default, VWF includes a few dozen components which we will use throughout this tutorial. And of course, you can create your own as well.</p>
+
+<p>For example, <code>node3.vwf</code> component represents a 3D <em>node</em> in the scene. We&#39;ll use the term <em>node</em> a lot, but it simply refers to any object in a VWF application.</p>
+
+<p>Each node3 will be a child of the main application. The syntax looks like:</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/scene.vwf</span>
+<span class="l-Scalar-Plain">children</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">board</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">board.dae</span>
+</code></pre></div>
+<p>Copy the above code to <code>index.vwf.yaml</code> and save.  Now go ahead and run the application. You should see something like the following:</p>
+
+<p><img src="/images/shot1.png" alt=""></p>
+
+<p>The view starts out in the middle of our board object. You can use up, down, left, and right, as well as the scroll wheel, to navigate around the scene.</p>
+
+<p>Let&#39;s add the rest of the 3D components to the scene.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/scene.vwf</span>
+<span class="l-Scalar-Plain">children</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">board</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">board.dae</span>
+  <span class="l-Scalar-Plain">playerOne</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">paddle.dae</span>
+  <span class="l-Scalar-Plain">playerTwo</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">paddle.dae</span>
+  <span class="l-Scalar-Plain">ball</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ball.dae</span>
+</code></pre></div>
+<p>Components are quite flexible little things. They provide complex functionality that can be utilized simply by creating a node that <code>extends</code> them. For example, we can add a child node that extends <code>material.vwf</code> to any <code>node3.vwf</code>. This node allows us to easily change the material of 3D objects, including their color. Let&#39;s add some color to the ball.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">ball</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ball.dae</span>
+    <span class="l-Scalar-Plain">children</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">ballMaterial</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/material.vwf</span>
+        <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+          <span class="l-Scalar-Plain">color</span><span class="p-Indicator">:</span> <span class="s">&quot;#0000ff&quot;</span>
+</code></pre></div>
+<p>If you reload the application and look to the right (use the <code>E</code> key to rotate right), you&#39;ll see the ball is now a dark blue.</p>
+
+<p><img src="/images/shot2.png" alt=""></p>
+
+<p>You&#39;ll notice that we set the value for the color by adding a <code>properties</code> section to the <code>ballMaterial</code> and setting the <code>color</code> property to a hexadecimal color value. Properties are like public variables. You can add whatever properties you would like to a node.</p>
+
+<p>The <code>material.vwf</code> component uses the <code>color</code> property to determine the object&#39;s color. If you tried changing the name of the <code>color</code> property to <code>myColor</code>, you&#39;ll notice that the ball is still gray.</p>
+
+<p><code>material.vwf</code> does a whole lot more than just color. It can handle textures, opacity, and even shininess. Check out the <a href="/documentation.html#materials">Material Documentation</a> for a proper rundown.</p>
+
+<p>For more information on components, properties, and the <code>extends</code> keyword, see the <a href="/documentation.html#components">Components Documentation</a>.</p>
+
+<h3>Lighting Things Up</h3>
+
+<p>Things are looking rather dark. Let&#39;s shed some light on our subjects. Adding a light to the scene is similar to adding 3D objects: we simply add a child node that extends the <code>light.vwf</code> component.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/scene.vwf</span>
+<span class="l-Scalar-Plain">children</span><span class="p-Indicator">:</span>
+  <span class="c1"># Other child nodes omitted</span>
+  <span class="l-Scalar-Plain">light</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/light.vwf</span>
+</code></pre></div>
+<p>We&#39;ve added a child node named <code>light</code>, but that doesn&#39;t make it a light. We could have named it anything. We <em>make</em> it a light by using <code>extends</code> to add the functionality from <code>light.vwf</code>. By default, the light will appear right in the middle of the scene, which will be pretty obnoxious lighting. Let&#39;s have the light shine down on the board instead.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">light</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/light.vwf</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">distance</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2000</span>
+      <span class="l-Scalar-Plain">translation</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span> <span class="nv">400</span><span class="p-Indicator">,</span> <span class="nv">-400</span><span class="p-Indicator">,</span> <span class="nv">900</span> <span class="p-Indicator">]</span>
+</code></pre></div>
+<p>Much better!</p>
+
+<p><img src="/images/shot3.png" alt=""></p>
+
+<p>Once again, we added a few special properties to <code>light</code> that <code>light.vwf</code> depends on. </p>
+
+<p><code>translation</code> does exactly what you would expect it to do in a 3D scene: it moves the light along the x, y, and z axes, respectively. We&#39;re moving our light to the corner of the board and then 900 units above to produce a nice gradient lighting effect on the board.</p>
+
+<p><code>distance</code> tells the light how far it&#39;s effective range is. Since we&#39;re moving ours about 1000 units or so from the board, let&#39;s make distance comfortably large, like 2000, to make sure it&#39;s lighting all the models in our scene.</p>
+
+<p>Lights default to being point lights, meaning they shine in all directions simultaneously. VWF also supports directional and spot lights, as well as a host of properties for manipulating lighting including color, intensity, and softness. For more information on lighting in VWF, see the <a href="/documentation.html#lights">Lighting Documentation</a>.</p>
+
+<h3>Positioning the Camera</h3>
+
+<p>So far, it&#39;s probably getting pretty annoying to have to navigate around using the arrow keys every time we reload the application. Let&#39;s position the camera so that it starts in an intelligent place each time.</p>
+
+<p>Any time the application extends <code>scene.vwf</code>, you get a camera for free, so we don&#39;t need to add a child node in this case. Rather, we will need to do some trickery <em>after</em> the application loads. Due to a wrinkle in our camera code, we&#39;ll need to wait until the application loads before we move the camera. We&#39;ll improve this in the future. For now, it would be a good time to introduce two new sections: <code>methods</code> and <code>scripts</code>.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+</code></pre></div>
+<p>With <code>methods</code>, we declare functions which will exist at the application level and can be called by nodes or other methods. In our <code>scripts</code> section, we&#39;ll define each method&#39;s implementation using JavaScript. To move our camera, we need to add a method to initialize the camera and also define it. </p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="c1"># Beginning of app omitted</span>
+<span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">initializeCamera</span><span class="p-Indicator">:</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+    <span class="no">this.initializeCamera = function() {</span>
+      <span class="no">this.camera.translation = [ 250, -600, 150 ];</span>
+      <span class="no">this.camera.rotation = [ 1, 0, 0, -10 ];</span>
+    <span class="no">}</span>
+</code></pre></div>
+<p>Our new <code>initializeCamera</code> method is pretty simple. As I mentioned, the application will have a camera added it to it automagically due to extending <code>scene.vwf</code>. Also, we can access child nodes on the application from within JavaScript using <code>this.nodeName</code> where <code>nodeName</code> is the name of the node. We can then set any of the properties (remember those from above?) on that node.</p>
+
+<p>So, <code>this.camera.translation = [ x, y, z ]</code> will move the camera to that point in the 3D scene. We&#39;re moving the camera out to the side of the board, and then up in the air to look down on the scene.</p>
+
+<p>Also, it would be helpful to rotate the camera down towards the board a bit. We do that by setting the camera&#39;s rotation in the same way we set translation. The way to read the rotation array is as follows: <code>[ rotateAroundX, rotateAroundY, rotateAroundZ, rotationAngle ]</code>. So our rotation happens around the X axis only (thus the 1), and rotates it by -10 degrees.</p>
+
+<p>But we&#39;re not done yet. The <code>initializeCamera</code> method isn&#39;t called automatically. We need to call it. To do that, we need to implement a special method called <code>initialize</code>.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="c1"># Beginning of app omitted</span>
+<span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">initializeCamera</span><span class="p-Indicator">:</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+    <span class="no">this.initialize = function() {</span>
+      <span class="no">this.future( 0 ).initializeCamera();</span>
+    <span class="no">}</span>
+    <span class="no">this.initializeCamera = function() {</span>
+      <span class="no">this.camera.translation = [ 250, -600, 150 ];</span>
+      <span class="no">this.camera.rotation = [ 1, 0, 0, -10 ];</span>
+    <span class="no">}</span>
+</code></pre></div>
+<p><code>initialize</code> gets called each time the application loads. In the <code>initialize</code> method, we then call <code>initializeCamera</code>,</p>
+
+<p>However, there is one wrinkle. We need to make sure to only initialize the camera after the scene is fully loaded. To ensure that, we use the <code>future</code> callback. <code>future</code> takes a single parameter, an integer, and waits until the specified number of seconds have passed before executing any methods chained off of it. <code>future( 0 )</code> says &quot;wait until the very next tick before executing.&quot; It&#39;s a shortcut to postpone function calls until the scene fully loads and the simulator starts the clock ticking.</p>
+
+<p>Give that a reload, and you should have the board centered in your application&#39;s view.</p>
+
+<p><img src="/images/shot4.png" alt=""></p>
+
+<p>For more information about manipulating the camera, see the <a href="/documentation.html#cameras">Camera Documentation</a>.</p>
+
+<h3>Position the Paddle</h3>
+
+<p>With your new and improved view of the scene, you&#39;ll notice that only one paddle appears, even though we&#39;re loading two of them. That&#39;s because they&#39;re on top of each other. Let&#39;s move one of the paddles to the other side of the board using... you guessed it: <code>translation</code>.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">playerOne</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">paddle.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">translation</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">-470</span><span class="p-Indicator">,</span> <span class="nv">0</span><span class="p-Indicator">,</span> <span class="nv">0</span><span class="p-Indicator">]</span>
+</code></pre></div>
+<p>As you now know, simply setting the <code>translation</code> property will get that paddle right into place. </p>
+
+<p><img src="/images/shot5.png" alt=""></p>
+
+<p>The stage is set. We&#39;ve got a board, a ball, two paddles, and a camera directed at the lighted scene. It&#39;s time to get things moving by wiring up some actual behavior and animation.</p>
+
+<h2>Animating the Scene</h2>
+
+<h3>Bouncing the Ball</h3>
+
+<p>Our scene will get a lot more interesting once things start moving. Let&#39;s start with the ball. We&#39;ll need to start by adding some properties on the ball that we can use to keep track of it&#39;s movement.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">ball</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ball.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">xSpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+      <span class="l-Scalar-Plain">ySpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
+    <span class="c1"># children: omitting material</span>
+</code></pre></div>
+<p>We&#39;ll use <code>xSpeed</code> and <code>ySpeed</code> to keep track of how quickly the ball is moving on the x and y axes.</p>
+
+<p>Next we&#39;ll need to add a method to the ball to handle actually moving it.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">ball</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ball.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">xSpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+      <span class="l-Scalar-Plain">ySpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
+    <span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">move</span><span class="p-Indicator">:</span>
+    <span class="c1"># children: omitting material</span>
+    <span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+      <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+        <span class="no">this.move = function() {</span>
+          <span class="no">var newTrans = [ </span>
+            <span class="no">this.translation[ 0 ] + this.xSpeed, </span>
+            <span class="no">this.translation[ 1 ] + this.ySpeed, </span>
+            <span class="no">this.translation[ 2 ] </span>
+          <span class="no">];</span>
+          <span class="no">this.translation = newTrans;</span>
+        <span class="no">};</span>
+</code></pre></div>
+<p>For a really simple start on moving the ball, we access the <code>translation</code> property, add some to it, and then set the ball&#39;s translation property to that new location. (Don&#39;t get too clever. If you try to set the translation array&#39;s individual elements directly, VWF won&#39;t pick up on the change. See this and other interesting twists in our <a href="">Pitfalls Documentation</a>.) </p>
+
+<p>But that alone is not enough to get the ball moving. We need to kick off the <code>move</code> method once the application starts and then make sure it gets called regularly to keep the ball moving. Let&#39;s add a method called <code>update</code> to move the ball forward, so to speak.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">update</span><span class="p-Indicator">:</span>
+<span class="c1"># Some of the application omitted</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+      <span class="no">this.initialize = function() {</span>
+        <span class="no">this.future( 0 ).initializeCamera();</span>
+        <span class="no">this.future( 0 ).update();</span>
+      <span class="no">}</span>
+      <span class="no">// Some functions omitted</span>
+      <span class="no">this.update = function() {</span>
+        <span class="no">this.ball.move();</span>
+        <span class="no">this.future( 1.0/60.0 ).update();  // schedule the next step</span>
+      <span class="no">}</span>
+</code></pre></div>
+<p>Pretty simple, eh? <code>initialize</code> will be called while the application is loading, which will schedule the first call to <code>update</code> using our familar <code>future( 0 )</code> syntax. When <code>update</code> gets called, it calls the ball&#39;s <code>move</code> method, and then schedules another call to <code>update</code> just a short time later, again using <code>future()</code>. 1/60th of a second later, to be precise. That should give us approximately 60 updates a second, which should be silky smooth.</p>
+
+<p>Reload your application. It moves!</p>
+
+<p><img src="/images/shot6.gif" alt=""></p>
+
+<h4>The Walls</h4>
+
+<p>But that&#39;s a pretty uninteresting move. It goes right off the edge of the board! We don&#39;t have Pong yet. Not even ping, really. Adding wall bounces is not too hard, though.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">ball</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ball.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">xSpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+      <span class="l-Scalar-Plain">ySpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
+    <span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">move</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+      <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+        <span class="no">this.move = function() {</span>
+          <span class="no">var newTrans = [ </span>
+            <span class="no">this.translation[ 0 ] + this.xSpeed, </span>
+            <span class="no">this.translation[ 1 ] + this.ySpeed, </span>
+            <span class="no">this.translation[ 2 ] </span>
+          <span class="no">];</span>
+
+          <span class="no">// Did we hit a wall?</span>
+          <span class="no">var maxY = 145;</span>
+          <span class="no">var minY = -maxY;</span>
+          <span class="no">if ( newTrans[ 1 ] &gt;= maxY ) {</span>
+            <span class="no">newTrans[ 1 ] = maxY;</span>
+            <span class="no">this.ySpeed = -this.ySpeed;</span>
+          <span class="no">} else if ( newTrans[ 1 ] &lt;= minY ) {</span>
+            <span class="no">newTrans[ 1 ] = minY;</span>
+            <span class="no">this.ySpeed = -this.ySpeed;</span>
+          <span class="no">}</span>
+
+          <span class="no">this.translation = newTrans;</span>
+        <span class="no">};</span>
+</code></pre></div>
+<p>We&#39;ll track the position of the walls in <code>minY</code> and <code>maxY</code>, and every time we contact one, we&#39;ll reverse the <code>ySpeed</code>, which will nicely simulate a bounce.</p>
+
+<p>Reload again.</p>
+
+<p><img src="/images/shot7.gif" alt=""></p>
+
+<p>Now that&#39;s better. At least the ball doesn&#39;t tumble off the edges of the board. But we still pass right through our paddles. Sure would be nice to bounce off of those, too.</p>
+
+<p>We&#39;ll need to be a little smarter when colliding with paddles.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml">  <span class="c1"># Beginning of app omitted</span>
+  <span class="l-Scalar-Plain">playerOne</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">paddle.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">xPos</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">-220</span>
+      <span class="l-Scalar-Plain">translation</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span> <span class="nv">-470</span><span class="p-Indicator">,</span> <span class="nv">0</span><span class="p-Indicator">,</span> <span class="nv">0</span> <span class="p-Indicator">]</span>
+  <span class="l-Scalar-Plain">playerTwo</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">paddle.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">xPos</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">231</span>
+  <span class="l-Scalar-Plain">ball</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">extends</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://vwf.example.com/node3.vwf</span>
+    <span class="l-Scalar-Plain">source</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ball.dae</span>
+    <span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">xSpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+      <span class="l-Scalar-Plain">ySpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">5</span>
+    <span class="l-Scalar-Plain">methods</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">move</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">dealWithPaddleBounce</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+      <span class="no">this.move = function() {</span>
+        <span class="no">var newTrans = [ </span>
+          <span class="no">this.translation[ 0 ] + this.xSpeed, </span>
+          <span class="no">this.translation[ 1 ] + this.ySpeed, </span>
+          <span class="no">this.translation[ 2 ] </span>
+        <span class="no">];</span>
+
+        <span class="no">// Did we hit a wall?</span>
+        <span class="no">var maxY = 145;</span>
+        <span class="no">var minY = -maxY;</span>
+        <span class="no">if ( newTrans[ 1 ] &gt;= maxY ) {</span>
+          <span class="no">newTrans[ 1 ] = maxY;</span>
+          <span class="no">this.ySpeed = -this.ySpeed;</span>
+        <span class="no">} else if ( newTrans[ 1 ] &lt;= minY ) {</span>
+          <span class="no">newTrans[ 1 ] = minY;</span>
+          <span class="no">this.ySpeed = -this.ySpeed;</span>
+        <span class="no">}</span>
+
+        <span class="no">// Did we hit a paddle?</span>
+        <span class="no">var ballAtRightSide = ( newTrans[ 0 ] &gt;= this.parent.playerTwo.xPos );</span>
+        <span class="no">var ballAtLeftSide = ( newTrans[ 0 ] &lt;= this.parent.playerOne.xPos );</span>
+        <span class="no">if ( ballAtRightSide ) {</span>
+          <span class="no">this.dealWithPaddleBounce( this.parent.playerTwo, newTrans );</span>
+        <span class="no">} else if ( ballAtLeftSide ) {</span>
+          <span class="no">this.dealWithPaddleBounce( this.parent.playerOne, newTrans );</span>
+        <span class="no">} else {</span>
+          <span class="no">this.translation = newTrans;</span>
+        <span class="no">}</span>
+      <span class="no">};</span>
+      <span class="no">this.dealWithPaddleBounce = function( paddle, translation ) {</span>
+        <span class="no">var yPos = paddle.translation[ 1 ];</span>
+        <span class="no">var paddleExtent = 36;</span>
+        <span class="no">if ( translation[ 1 ] &gt; ( yPos + paddleExtent ) || translation[ 1 ] &lt; ( yPos - paddleExtent ) ) {</span>
+          <span class="no">// Ball got past the paddle: reset the ball position and speed.</span>
+          <span class="no">this.translateTo( [ 0, 0, 0 ] );</span>
+          <span class="no">this.xSpeed = 2;</span>
+          <span class="no">this.ySpeed = 5;</span>
+          <span class="no">return true;</span>
+        <span class="no">} else {</span>
+          <span class="no">// Ball hit the paddle: just bounce.</span>
+          <span class="no">translation[ 0 ] = paddle.xPos;</span>
+          <span class="no">this.xSpeed = -this.xSpeed;</span>
+          <span class="no">return false;</span>
+        <span class="no">}</span>
+      <span class="no">};</span>
+</code></pre></div>
+<p>First, we&#39;ll need each paddle to keep track of where it&#39;s located in terms of the ball&#39;s x coordinates. We can do this by adding an <code>xPos</code> property to each paddle.</p>
+
+<p>Then we&#39;ll check in our <code>move</code> method to see if the ball has reached either paddle. If so, then we&#39;ll need to check the paddle&#39;s y position to see if the ball has collided with the paddle, or whether it&#39;s missed it. If the ball gets past the paddle, we&#39;ll reset it to the middle of the board and start it bouncing again. If the ball hits the paddle, we&#39;ll just do a regular bounce by reversing the <code>xSpeed</code>.</p>
+
+<p>If all that seems quite overcomplicated, don&#39;t worry too much about it. The purpose of this guide is to get you started with VWF. For more detail on Pong, check out <a href="http://robots.thoughtbot.com/pong-clone-in-javascript">this Pong tutorial</a> which goes more into the mechanics of Pong.</p>
+
+<p><img src="/images/shot8.gif" alt=""></p>
+
+<p>Awesome! Now we&#39;ve got a ball bouncing up and down the board and bouncing off of the paddles, or getting past them as appropriate. Now how can we move those paddles up and down?</p>
+
+<h3>Pushing The Paddles</h3>
+
+<p>Moving our paddles will be a multi-step process. First, we need to capture keystrokes. Then, we need to assign movement up and down to specific keys. Finally, we need to actually move each paddle, being careful not to move our paddles off the edge of the board.</p>
+
+<p>The first step, capturing keystrokes, is pretty straightforward in VWF. We&#39;ll add a <code>properties</code> section at the top level and a new method to our <code>scripts</code> section.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">keyPressInfo</span><span class="p-Indicator">:</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+    <span class="no">// Other functions omitted</span>
+    <span class="no">this.keyDown = this.keyUp = function( input ) {</span>
+      <span class="no">this.keyPressInfo = input;</span>
+    <span class="no">}</span>
+</code></pre></div>
+<p>The <code>keyPressInfo</code> property will track the current state of the keyboard - what&#39;s pressed, what&#39;s not pressed. Then we&#39;ll take advantage of two more special functions called <code>keyDown</code> and <code>keyUp</code>. Each of these functions is called whenever any key is pressed or released on the keyboard, respectively. We&#39;ll simply assign the keyboard&#39;s state to our property each time it changes.</p>
+
+<p>Next, we&#39;ll need to assign specific keys to the movement function.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">keyPressInfo</span><span class="p-Indicator">:</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+    <span class="no">// Other functions omitted</span>
+    <span class="no">this.update = function() {</span>
+      <span class="no">if ( this.keyPressInfo ) {</span>
+        <span class="no">for ( var keyPress in this.keyPressInfo.keysDown ) {</span>
+          <span class="no">switch( keyPress ) {</span>
+            <span class="no">case &#39;R&#39;:</span>
+              <span class="no">console.log(&quot;Moving playerOne up&quot;);</span>
+              <span class="no">break;</span>
+            <span class="no">case &#39;F&#39;:</span>
+              <span class="no">console.log(&quot;Moving playerOne down&quot;);</span>
+              <span class="no">break;</span>
+            <span class="no">case &#39;O&#39;:</span>
+              <span class="no">console.log(&quot;Moving playerTwo up&quot;);</span>
+              <span class="no">break;</span>
+            <span class="no">case &#39;L&#39;:</span>
+              <span class="no">console.log(&quot;Moving playerTwo down&quot;);</span>
+              <span class="no">break;</span>
+            <span class="no">default:</span>
+              <span class="no">break;</span>
+          <span class="no">}</span>
+        <span class="no">}</span>
+      <span class="no">}</span>
+      <span class="no">this.ball.move();</span>
+      <span class="no">this.future( 1.0/60.0 ).update();  // schedule the next step</span>
+    <span class="no">}</span>
+    <span class="no">this.keyDown = this.keyUp = function( input ) {</span>
+      <span class="no">this.keyPressInfo = input;</span>
+    <span class="no">}</span>
+</code></pre></div>
+<p>Each time our <code>update</code> method updates the application, we&#39;ll check to see what keys are down, then print a console statement when one of our special keys is pressed.</p>
+
+<p>As you can see from the above switch statement, we chose the very significant &#39;R&#39; and &#39;F&#39; keys for Up and Down for Left Paddle and the almost-as-significant &#39;O&#39; and &#39;L&#39; for the Up and Down for Right Paddle. Excellent choices, if I do say so myself.</p>
+
+<p>Give it a try. It should look something like the following.</p>
+
+<p><img src="/images/shot9.gif" alt=""></p>
+
+<p>Now we need to actually <em>move</em> the paddle each time the key is pressed.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">keyPressInfo</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">paddleSpeed</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2.5</span>
+<span class="l-Scalar-Plain">scripts</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="p-Indicator">|</span>
+    <span class="no">this.update = function() {</span>
+      <span class="no">if ( this.keyPressInfo ) {</span>
+        <span class="no">for ( var keyPress in this.keyPressInfo.keysDown ) {</span>
+          <span class="no">switch( keyPress ) {</span>
+            <span class="no">case &#39;R&#39;:</span>
+              <span class="no">this.movePlayer( this.playerOne, +1 );</span>
+              <span class="no">break;</span>
+            <span class="no">case &#39;F&#39;:</span>
+              <span class="no">this.movePlayer( this.playerOne, -1 );</span>
+              <span class="no">break;</span>
+            <span class="no">case &#39;O&#39;:</span>
+              <span class="no">this.movePlayer( this.playerTwo, +1 );</span>
+              <span class="no">break;</span>
+            <span class="no">case &#39;L&#39;:</span>
+              <span class="no">this.movePlayer( this.playerTwo, -1 );</span>
+              <span class="no">break;</span>
+            <span class="no">default:</span>
+              <span class="no">break;</span>
+          <span class="no">}</span>
+        <span class="no">}</span>
+      <span class="no">}</span>
+      <span class="no">this.ball.move();</span>
+      <span class="no">this.future( 1.0/60.0 ).update();  // schedule the next step</span>
+    <span class="no">}</span>
+    <span class="no">this.keyDown = this.keyUp = function( input ) {</span>
+      <span class="no">this.keyPressInfo = input;</span>
+    <span class="no">}</span>
+    <span class="no">this.movePlayer = function( player, direction ) {</span>
+      <span class="no">var amount = direction * this.paddleSpeed;</span>
+      <span class="no">if ( player.translation[ 1 ] + amount &gt;= 120 || player.translation[ 1 ] + amount &lt;= -120 ) {</span>
+        <span class="no">player.translateTo( [ player.translation[ 0 ], 120 * direction, 0 ] );</span>
+        <span class="no">return;</span>
+      <span class="no">} else {</span>
+        <span class="no">player.translateBy( [ 0, direction * this.paddleSpeed, 0 ] );</span>
+      <span class="no">}</span>
+    <span class="no">}</span>
+</code></pre></div>
+<p>Notice that we didn&#39;t need to add the <code>movePlayer</code> function to the <code>methods</code> section. Does that seem odd? Well, we&#39;re only using <code>movePlayer</code> to re-use code in our switch statement. We don&#39;t want it to be publicly accessible. The methods defined in <code>methods</code> are part of the application&#39;s public API.</p>
+
+<p>Don&#39;t forget to add the property <code>paddleSpeed</code> to the properties section. If you feel like giving yourself a little boost, tweak that number a bit higher.</p>
+
+<p>That&#39;s it!</p>
+
+<p><img src="/images/shot10.gif" alt=""></p>
+
+<p>Now for a little fun. Check out the URL line for your VWF application in the browser. It should be localhost, followed by a random string, such as <code>http://localhost:3000/NQj7NrhyYhBw27eU/</code>. Go ahead and copy the URL from your browser, open up another browser window, and paste it in.</p>
+
+<p>Voila! Both browser windows are now engaged in the same epic game of Pong! </p>
+
+<p>How does this work? VWF automatically synchronizes all of the application&#39;s state: nodes, children, properties and such, and &quot;repeats&quot; or &quot;reflects&quot; that state to each client that connects. The random string represents an &quot;instance&quot; of the application. VWF maintains separate state for each instance. It just works.</p>
+
+<p>If you connect to an application without specifying which instance (by going to <code>http://localhost:3000</code>, for example), VWF creates a new instance of the application and redirects the user to the application URL with the instance string appended to it. Go ahead and give that a try.</p>
+
+<p>This is part of the magic of VWF: seamlessly shared state. Simply structure your application using the VWF primitives such as properties and methods and you can create collaborative, immersive applications in the browser easily.</p>
+
+<p>Well, now that it works, let&#39;s dress up the application a bit.</p>
+
+<h2>Customizing Our Pong Application</h2>
+
+<p>So far, we&#39;ve focused on VWF&#39;s 3D capabilities via WebGL. But VWF isn&#39;t just for 3D applications: you have access to the application&#39;s HTML and CSS as well.</p>
+
+<h3>Adding HTML</h3>
+
+<p>VWF automatically generates an HTML frame and embeds the 3D canvas in that frame. However, you can add your own HTML as well. Create a file named <code>index.vwf.html</code>. VWF will pick up this HTML and insert it into the auto-generated application page.</p>
+
+<p>Let&#39;s start with a simple title on our page: VWF Pong.</p>
+<div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;style </span><span class="na">type=</span><span class="s">&quot;text/css&quot;</span><span class="nt">&gt;</span>
+  <span class="nf">#overlay</span> <span class="p">{</span>
+    <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
+    <span class="k">width</span><span class="o">:</span> <span class="m">95</span><span class="o">%</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nf">#overlay</span> <span class="nt">h1</span> <span class="p">{</span>
+    <span class="k">text-align</span><span class="o">:</span> <span class="k">center</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="nt">&lt;/style&gt;</span>
+
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;overlay&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>VWF Pong<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+<p>In HTML, canvas elements automatically overlay everything else on the page. We need to tell our <code>&lt;div&gt;</code> to come to be in front, which we can accomplish with a simple <code>position: absolute;</code>. Now anything we place inside our overlay div will appear over the top of the canvas.</p>
+
+<p>We start out with a very simple <code>&lt;h1&gt;</code> with a title of &quot;VWF Pong.&quot;</p>
+
+<p><img src="/images/shot11.png" alt=""></p>
+
+<p>It would be nice to let players of the game know which keys control the paddles so they don&#39;t have to blithely jab at keys until the paddles move.</p>
+<div class="highlight"><pre><code class="html language-html" data-lang="html"><span class="nt">&lt;style </span><span class="na">type=</span><span class="s">&quot;text/css&quot;</span><span class="nt">&gt;</span>
+  <span class="nf">#overlay</span> <span class="p">{</span>
+    <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
+    <span class="k">width</span><span class="o">:</span> <span class="m">95</span><span class="o">%</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nf">#overlay</span> <span class="nt">h1</span> <span class="p">{</span>
+    <span class="k">text-align</span><span class="o">:</span> <span class="k">center</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nf">#player-one</span> <span class="p">{</span>
+    <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
+    <span class="k">left</span><span class="o">:</span> <span class="m">20px</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nf">#player-two</span> <span class="p">{</span>
+    <span class="k">position</span><span class="o">:</span> <span class="k">absolute</span><span class="p">;</span>
+    <span class="k">right</span><span class="o">:</span> <span class="m">20px</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="nt">&lt;/style&gt;</span>
+
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;overlay&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>VWF Pong<span class="nt">&lt;/h1&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;player-one&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;strong&gt;</span>Player 1<span class="nt">&lt;/strong&gt;&lt;br/&gt;</span>
+    Paddle Up: R<span class="nt">&lt;br/&gt;</span>
+    Paddle Down: F
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;player-two&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;strong&gt;</span>Player 2<span class="nt">&lt;/strong&gt;&lt;br/&gt;</span>
+    Paddle Up: O<span class="nt">&lt;br/&gt;</span>
+    Paddle Down: L
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div>
+<p>There. That&#39;s better.</p>
+
+<p><img src="/images/shot12.png" alt=""></p>
+
+<h3>Setting The Title</h3>
+
+<p>VWF also allows you to provide configuration for your application, including setting the title of the webpage. This is accomplished via a special file called <code>index.vwf.config.yaml</code>.</p>
+<div class="highlight"><pre><code class="yaml language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="l-Scalar-Plain">info</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">title</span><span class="p-Indicator">:</span> <span class="s">&quot;VWF</span><span class="nv"> </span><span class="s">Pong&quot;</span>
+</code></pre></div>
+<p>This does exactly what you would expect. It sets the title of the webpage.</p>
+
+<h2>Wrapping It Up</h2>
+
+<p>That&#39;s it! In these past minutes, you&#39;ve explored the basics of creating 3D, collaborative applications with VWF. As you can see, fairly complex applications can be created rather quickly. We&#39;re excited to see what you&#39;ll do with it.</p>
+
+		</div>
+	</div>
+</div>
+    <!-- Footer
+    ================================================== -->
+    <footer class="vwf-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-6">
+            <table class="contacts">
+              <tbody>
+                <tr><td>GitHub</td><td><a href="https://github.com/virtual-world-framework">@virtual-world-framework</a></td></tr>
+                <tr><td>Twitter</td><td><a href="http://twitter.com/VirtualWF">@VirtualWF</a></td></tr>
+                <!-- <tr><td>Stack Overflow</td><td><a href="http://stackoverflow.com/questions/tagged/vwf">#VWF</a></td></tr> -->
+                <tr><td>Issues?</td><td><a href="https://github.com/virtual-world-framework/vwf/issues/new">Create a GitHub Issue</a></td></tr>
+              </tbody>
+            </table>            
+          </div>
+          <div class="legal col-sm-6">
+            <p class="small">Development of the Virtual World Framework is sponsored by the Department of Defense and is <a href="https://github.com/virtual-world-framework/vwf/blob/master/LICENSE">licensed</a> using Apache 2.</p>
+            <p class="small">"Collaboration" symbol by Krisada, "Toolbox" symbol by Dolly Vu, "3D Glasses" symbol by Fabio Grande, from <a href="http://thenounproject.com">The Noun Project</a> collection.
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery-1.10.2.min.js"></script>
+    
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/ZeroClipboard.min.js"></script>
+    <script src="js/application.js"></script>
+    <script src="js/compatibility.js"></script>
+
+<script src="js/utility.js"></script>
+
+<script src="js/getting_started.js"></script>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-30971226-1', 'virtualworldframework.com');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
+

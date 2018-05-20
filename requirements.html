@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Virtual World Framework</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/syntax.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <link href="/css/vwf.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <div class="navbar navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">
+            <img src="/images/vwf-logo-100x100.png" class="pull-left" alt="VWF Duck Logo">
+            <span class="pull-right">Virtual<br>World<br>Framework</span>
+          </a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/demos.html">Demos</a></li>
+            <li><a href="/getting_started.html">Tutorial</a></li>
+            <li><a href="/documentation.html">Documentation</a></li>
+            <li><a href="/releases.html">Downloads</a></li>
+          </ul>
+          <a href="http://github.com/virtual-world-framework/vwf" class="btn btn-info navbar-btn pull-right hidden-sm" role="button">View on GitHub</a>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">
+				
+	<h1>Browser Requirements</h1>
+
+<p>In order to successfully run the Virtual World Framework, the following browser requirements must be met:</p>
+
+<ul>
+<li>  HTML5</li>
+<li>  ECMAScript5</li>
+<li>  Browser with WebGL enabled (for 3D content)</li>
+<li>Browser with WebSocket enabled for multi-user functionality</li>
+</ul>
+
+<p>The following browsers are recommended for use:</p>
+
+<ul>
+<li>  <a href="https://www.google.com/intl/en/chrome/browser/">Chrome 27+</a></li>
+<li>  <a href="http://www.mozilla.org/en-US/firefox/new/">Firefox 21+</a></li>
+<li>  <a href="http://www.opera.com/developer/next">Opera 15+</a></li>
+</ul>
+
+<hr>
+
+<h2>Compatibility Quirks</h2>
+
+<h3>Windows</h3>
+
+<ul>
+<li><p>At this time we have limited support for Internet Explorer 10. Please see our demos of Google Earth and Tile Puzzle 2D to see what can be done with the framework without WebGL.  </p></li>
+<li><p>Internet Explorer 11 is rumored at this time to support WebGL, and we are constantly looking to the future of modern browsers to determine how well the Virtual World Framework is supported.</p></li>
+</ul>
+
+<h3>Macintosh OS X</h3>
+
+<ul>
+<li><p>Safari 5 is experiencing some issues at this time. We are working through multiple issues with Safari to get VWF and Safari compatibility completed.</p></li>
+<li><p>Firefox 22 Proxy Support for firewalls requires that under Firefox -&gt; Preferences -&gt; Network -&gt; Settings, you must select &quot;Manual Proxy Configuration&quot;, and place a check in the &quot;use this proxy server for all protocols&quot; checkbox.</p></li>
+</ul>
+
+<hr>
+
+<h2>Enabling WebGL</h2>
+
+<p>Use the following steps to verify that WebGL is enabled in your browser.</p>
+
+<h3>Chrome</h3>
+
+<ul>
+<li>  Open a new tab and type <em>chrome://flags</em> in the address bar.</li>
+<li>  Search for WebGL.</li>
+<li>  Verify <em>Disable WebGL</em> is not enabled. </li>
+<li>  If on an Android device, verify <em>Enable WebGL Android</em> is enabled.</li>
+</ul>
+
+<h3>Firefox</h3>
+
+<ul>
+<li>  Open a new tab and type <em>about:config</em> in the address bar. </li>
+<li>  Search for <em>WebGL.</em></li>
+<li>  Verify <em>webgl.disabled</em> is set to false. Alternatively, set <em>webgl.force-enabled</em> to true.</li>
+</ul>
+
+		</div>
+	</div>
+</div>
+    <!-- Footer
+    ================================================== -->
+    <footer class="vwf-footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-6">
+            <table class="contacts">
+              <tbody>
+                <tr><td>GitHub</td><td><a href="https://github.com/virtual-world-framework">@virtual-world-framework</a></td></tr>
+                <tr><td>Twitter</td><td><a href="http://twitter.com/VirtualWF">@VirtualWF</a></td></tr>
+                <!-- <tr><td>Stack Overflow</td><td><a href="http://stackoverflow.com/questions/tagged/vwf">#VWF</a></td></tr> -->
+                <tr><td>Issues?</td><td><a href="https://github.com/virtual-world-framework/vwf/issues/new">Create a GitHub Issue</a></td></tr>
+              </tbody>
+            </table>            
+          </div>
+          <div class="legal col-sm-6">
+            <p class="small">Development of the Virtual World Framework is sponsored by the Department of Defense and is <a href="https://github.com/virtual-world-framework/vwf/blob/master/LICENSE">licensed</a> using Apache 2.</p>
+            <p class="small">"Collaboration" symbol by Krisada, "Toolbox" symbol by Dolly Vu, "3D Glasses" symbol by Fabio Grande, from <a href="http://thenounproject.com">The Noun Project</a> collection.
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery-1.10.2.min.js"></script>
+    
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/ZeroClipboard.min.js"></script>
+    <script src="js/application.js"></script>
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-30971226-1', 'virtualworldframework.com');
+  ga('send', 'pageview');
+</script>
+  </body>
+</html>
+
